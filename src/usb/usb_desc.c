@@ -41,6 +41,11 @@
 #include "usb_desc.h"
 
 
+/*---------------Power---------------------------*/
+#ifndef USB_MAX_CURRENT_MA
+#define USB_MAX_CURRENT_MA          100
+#endif
+
 /*------------- Interface Numbering -------------*/
 enum {
     ITF_NUM_CDC = 0  ,
@@ -79,30 +84,33 @@ enum {
 // STRING DESCRIPTORS
 //--------------------------------------------------------------------+
 
+#ifndef DEVICE_STRING_DESCRIPTORS
+#define DEVICE_STRING_DESCRIPTORS {                                                                                 \
+    /* 0: is supported language = English */                                                                        \
+    TUD_DESC_STRCONV(0x0409),                                                                                       \
+                                                                                                                    \
+    /* 1: Manufacturer */                                                                                           \
+    TUD_DESC_STRCONV('A','d','a','f','r','u','i','t',' ','I','n','d','u','s','t','r','i','e','s'),                  \
+                                                                                                                    \
+    /* 2: Product */                                                                                                \
+    TUD_DESC_STRCONV('B','l','u','e','f','r','u','i','t',' ','n','R','F','5','2','8','4','0', ' ', 'D','F','U'),    \
+                                                                                                                    \
+    /* 3: Serials TODO use chip ID */                                                                               \
+    usb_desc_str_serial,                                                                                            \
+                                                                                                                    \
+    /* 4: CDC Interface */                                                                                          \
+    TUD_DESC_STRCONV('B','l','u','e','f','r','u','i','t',' ','S','e','r','i','a','l'),                              \
+                                                                                                                    \
+    /* 5: MSC Interface */                                                                                          \
+    TUD_DESC_STRCONV('B','l','u','e','f','r','u','i','t',' ','U','F','2'),                                          \
+}
+#endif
+
 // Serial is 64-bit DeviceID -> 16 chars len
 uint16_t usb_desc_str_serial[1+16] = { TUD_DESC_STR_HEADER(16) };
 
 // array of pointer to string descriptors
-uint16_t const * const string_desc_arr [] =
-{
-    // 0: is supported language = English
-    TUD_DESC_STRCONV(0x0409),
-
-    // 1: Manufacturer
-    TUD_DESC_STRCONV('A','d','a','f','r','u','i','t',' ','I','n','d','u','s','t','r','i','e','s'),
-
-    // 2: Product
-    TUD_DESC_STRCONV('B','l','u','e','f','r','u','i','t',' ','n','R','F','5','2','8','4','0', ' ', 'D','F','U'),
-
-    // 3: Serials TODO use chip ID
-    usb_desc_str_serial,
-
-    // 4: CDC Interface
-    TUD_DESC_STRCONV('B','l','u','e','f','r','u','i','t',' ','S','e','r','i','a','l'),
-
-    // 5: MSC Interface
-    TUD_DESC_STRCONV('B','l','u','e','f','r','u','i','t',' ','U','F','2'),
-};
+uint16_t const * const string_desc_arr [] = DEVICE_STRING_DESCRIPTORS;
 
 //--------------------------------------------------------------------+
 // Device Descriptor
@@ -145,7 +153,7 @@ usb_desc_cfg_t usb_desc_cfg =
         .bConfigurationValue = 1,
         .iConfiguration      = 0x00,
         .bmAttributes        = TUSB_DESC_CONFIG_ATT_BUS_POWER,
-        .bMaxPower           = TUSB_DESC_CONFIG_POWER_MA(100)
+        .bMaxPower           = TUSB_DESC_CONFIG_POWER_MA(USB_MAX_CURRENT_MA)
     },
 
     // IAD points to CDC Interfaces
